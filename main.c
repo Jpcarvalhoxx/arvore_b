@@ -1,5 +1,14 @@
 #include "arvore_b.h"
+#include "estruturas.h"
+#include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
+
+/*argv[2] - N° de registros
+  arqv[3] - Tipo de Arquivo
+  argv[4] - Key
+
+*/
 
 // Função para inicializar a árvore B
 bool initialTree(TApontador *tree) {
@@ -9,26 +18,6 @@ bool initialTree(TApontador *tree) {
 }
 
 // Função para imprimir os registros da árvore por níveis
-void printLvlTree(TApontador p, int nivel) {
-  long i;
-  if (p == NULL)
-    return; // Se o nó for nulo, retorna
-
-  printf("Nivel %d : ", nivel); // Imprime o nível atual
-  for (i = 0; i < p->n; i++)
-    printf("%ld ", (long)p->r[i].key); // Imprime as chaves dos registros no nó
-  putchar('\n');                       // Quebra de linha
-
-  nivel++; // Incrementa o nível
-  for (i = 0; i <= p->n; i++)
-    printLvlTree(p->p[i], nivel); // Recursivamente imprime os filhos
-}
-
-// Função para imprimir a árvore B
-void printTree(TApontador p) {
-  int nivel = 0;
-  printLvlTree(p, nivel); // Chama a função de impressão por níveis
-}
 
 // Função para inserir um registro na árvore B
 void insert(Registro reg, TApontador *Ap, Runtime *_run) {
@@ -263,9 +252,68 @@ void runtimeCPU(Runtime *r) {
       (double)(r->endToCreateTre - r->startToCreateTre) / CLOCKS_PER_SEC;
 }
 
-int main() {
-  // Estrutura Runtime para armazenar o número de comparações e o tempo de
-  // execução
+void selectFile(int type, char *nameFile) {
+  switch (type) {
+  case 1:
+    strcpy(nameFile, CRESCENTE);
+    break;
+  case 2:
+    strcpy(nameFile, DECRESCENTE);
+    break;
+  case 3:
+    strcpy(nameFile, ALEATORIO);
+    break;
+  default:
+    printf("Parametro de arquivo ordenado errado (1- Crescente, 2 - "
+           "Decrescente, 3 - Aleatorio\n");
+    exit(1);
+  }
+}
+
+bool convertArguments(char *arg, int *valor) {
+  if (sscanf(arg, "%d", valor) != 1) {
+    printf("Erro ao converter o argumento para inteiro: %s\n", arg);
+    return false; // Indica falha na conversão
+  }
+  return true; // Indica sucesso na conversão
+}
+
+bool verifyArguments(int nRegs, int typeArq, int key) {
+  if (nRegs <= 0 || nRegs > 2000000) {
+    printf("Argumento inválido para quantidade de elementos: 1 <= N <=2000000");
+    return false;
+  }
+
+  if (key > nRegs) {
+    printf("Valor da chave maior que a quantidade de dadosn o arquivo...");
+    return false;
+  }
+  if (typeArq != 1 && typeArq != 2 && typeArq != 3) {
+    printf("Parametro de arquivo ordenado errado (1- Crescente, 2 - "
+           "Decrescente, 3 - Aleatorio\n");
+
+    return false;
+  }
+
+  return true;
+}
+
+int main(int argc, char *argv[]) {
+  int nRegs = 0, typeArq = 0, key = 0;
+
+  if (!convertArguments(argv[2], &nRegs) ||
+      !convertArguments(argv[3], &typeArq) ||
+      !convertArguments(argv[4], &key)) {
+    exit(1);
+  }
+
+  if (!verifyArguments(nRegs, typeArq, key)) {
+    exit(1);
+  }
+
+  char nameFile[TAM_MAX_NAME_FILE];
+
+  selectFile(typeArq, nameFile);
 
   Runtime createTree;
   createTree.totalTime = 0.0;
@@ -275,146 +323,47 @@ int main() {
   searchInTree.totalTime = 0.0;
   searchInTree.interactions = 0;
 
-  // Ponteiro para a árvore B e ponteiro para registro
   TApontador tree;
   Registro *reg;
 
-  // Variáveis para a entrada do usuário
-  int opc = 0;
-  int nRegs = 0;
-  int typeArq = 0;
-  int printOrNot = 0;
-  char nameArq[50];
-
-  // Entrada do usuário para o número de registros, tipo de arquivo e opção de
-  // impressão
-  printf("Entrada 1: número de registros.\n");
-  printf("Entrada 2: tipo do arquivo (1 - crescente | 2 - decrescente | 3 - "
-         "aleatório).\n");
-  printf("Entrada 3: imprimir registro (1 - Sim | 0 - Não).\n");
-
-  scanf("%d %d %d", &nRegs, &typeArq, &printOrNot);
-
-  // Define o nome do arquivo com base no tipo escolhido
-  switch (typeArq) {
-  case 1:
-    strcpy(nameArq, "crescente.bin");
-    break;
-  case 2:
-    strcpy(nameArq, "decrescente.bin");
-    break;
-  case 3:
-    strcpy(nameArq, "aleatorio.bin");
-    break;
-
-  default:
-    printf("Argumento inválido para o tipo de arquivo...");
-    exit(1);
-    break;
-  }
-
-  // Verificações de entrada do usuário
-  if (nRegs <= 0 || nRegs > 2000000) {
-    printf(
-        "Argumento inválido para quantidade de elementos: 1 <= N <= 2000000");
-    exit(1);
-  }
-
-  if (printOrNot != 1 && printOrNot != 0) {
-    printf("Argumento inválido para a opção de imprimir ou não na tela");
-    exit(1);
-  }
-
   printf("-------------------------------------------------------------\n");
 
-  // Criação da Árvore B
   printf("Criando Árvore B...\n");
-  // iniando o tempo de execução na crianção da arvore.
+
   createTree.startToCreateTre = clock();
 
-  fillTheTree(&tree, nameArq, nRegs, &createTree);
+  fillTheTree(&tree, nameFile, nRegs, &createTree);
 
-  // finalizando o tempo de execução na criação da arvore.
   createTree.endToCreateTre = clock();
 
-  // fazendo o calculo em segundos do total de tempo de execução
   runtimeCPU(&createTree);
+
   printf(
       "Houve %d comparações na construção da Árvore B na memória principal\n",
       createTree.interactions);
   printf("Foi levado %fs para montar a árvore\n", createTree.totalTime);
   printf("\n");
 
-  int k;
+  searchInTree.startToCreateTre = clock();
+  search(&reg, tree, key, &searchInTree);
+  searchInTree.endToCreateTre = clock();
+  runtimeCPU(&searchInTree);
 
   printf("-------------------------------------------------------------\n");
 
-  // Menu principal
-  do {
-    printf("Digite:\n  0 - Pesquisar\n  1 - Sair\n  2 - Imprimir a árvore\n");
-    scanf("%d", &opc);
+  printf("Tempo de execução da CPU em segundos para pesquisar na árvore:%f\n",
+         searchInTree.totalTime);
+  printf("Houve %d comparações na pesquisada Árvore B na memória principal\n",
+         searchInTree.interactions);
+  searchInTree.interactions = 0;
 
-    switch (opc) {
-    case 0:
-      // Pesquisar na árvore
-      printf("Digite o valor da chave para pesquisar: ");
-      scanf("%d", &k);
-      printf("\n");
+  if (reg != NULL) {
+    printf("Key: [%d] - %ld | %s\n", reg->key, reg->cod, reg->word);
+  } else {
+    printf("O registro não está presente na árvore\n");
+  }
 
-      // iniando o tempo de execução de uma pesuisa na arvore.
-      searchInTree.startToCreateTre = clock();
-
-      search(&reg, tree, k, &searchInTree);
-
-      // finalizando o tempo de execução de uma pesuisa na arvore.
-
-      searchInTree.endToCreateTre = clock();
-
-      // calculando tempo total de uma pesquisa em segundos.
-
-      runtimeCPU(&searchInTree);
-
-      printf("-------------------------------------------------------------\n");
-
-      printf(
-          "Tempo de execução da CPU em segundos para pesquisar na árvore: %f\n",
-          searchInTree.totalTime);
-      printf(
-          "Houve %d comparações na pesquisa da Árvore B na memória principal\n",
-          searchInTree.interactions);
-      searchInTree.interactions = 0;
-
-      // Imprimir registro se a opção estiver ativada
-      if (printOrNot == 1) {
-        if (reg != NULL) {
-          printf("Key: [%d] - %ld | %s\n", reg->key, reg->cod, reg->word);
-        } else {
-          printf("O registro não está presente na árvore\n");
-        }
-      }
-
-      printf("-------------------------------------------------------------\n");
-      break;
-
-    case 2:
-      // Imprimir a árvore por nível
-      printf("Imprimindo a árvore:\n");
-      printTree(tree);
-      break;
-
-    case 1:
-      // Sair do programa
-      printf("Saindo...\n");
-      freeTree(tree); // Libera a memória da árvore antes de sair
-      break;
-
-    default:
-      printf("Opção errada...\n");
-      break;
-    }
-
-    printf("\n");
-  } while (opc != 1);
+  printf("-------------------------------------------------------------\n");
 
   return 0;
 }
