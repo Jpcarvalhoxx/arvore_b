@@ -18,12 +18,13 @@ A Árvore B possui as seguintes funcionalidades:
 
 O programa aceita os seguintes argumentos na linha de comando:
 
-- Número de dados a serem inseridos.
+- Método de ordenação: 1 para sequencial, 2 para árvore binária, 3 para árvore b, 4 para árvore b*.
+- N° de registros que serão utilizados do arquivo binário.
 - Tipo de ordenação dos dados: 1 para crescente, 2 para decrescente, 3 para aleatório.
-- Opção para mostrar ou não a informação encontrada: 1 para mostrar, 0 para não mostrar.
+- A chave a ser pesquisada.
 
 Exemplo de uso:
 
 ```bash
 make
-./exe 100 3 1
+./exe 3 2000000 3 10
