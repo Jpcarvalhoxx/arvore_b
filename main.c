@@ -39,7 +39,7 @@ void insert(Registro reg, TApontador *Ap, Runtime *_run) {
   }
 }
 
-// Função para preencher a árvore B a partir de um arquivo binário
+
 // Função para preencher a árvore B com registros de um arquivo binário
 void fillTheTree(TApontador *tree, char *nameArq, int quant, Runtime *_run) {
   // Inicializa a árvore B
@@ -117,7 +117,7 @@ void search(Registro **reg, TApontador Ap, int key, Runtime *_run) {
   }
 }
 
-// Função auxiliar para inserir um registro em uma página
+
 // Função para inserir um registro em uma página da árvore B
 void insertToPage(TApontador Ap, Registro reg, TApontador ApDir,
                   Runtime *_run) {
@@ -153,7 +153,7 @@ void insertToPage(TApontador Ap, Registro reg, TApontador ApDir,
   Ap->n++; // Incrementa o número de registros na página
 }
 
-// Função de inserção de um registro na árvore B
+
 // Função para inserir um registro em uma árvore B
 void ins(Registro reg, TApontador Ap, bool *cresceu, Registro *regReturn,
          TApontador *ApReturn, Runtime *_run) {
